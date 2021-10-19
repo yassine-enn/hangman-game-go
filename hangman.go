@@ -178,10 +178,10 @@ func main() {
 	randomNumber := rand.Intn(max-min) + min //picks a random number between 0 and the number of lines of words.txt*
 	word := wordsL[randomNumber]
 	remainingAttempts := 10
-	fmt.Println(DisplayBlankWord(word))
 	fmt.Printf("Saisissez la lettre voulue > ")
-	var guessedWord string = DisplayBlankWord(word)
+	var guessedWord string = DiplayRandLetters(DisplayBlankWord(word), word)
 	for remainingAttempts >= 0 && guessedWord != word {
+		fmt.Println(guessedWord)
 		fmt.Scan(&x)
 		isValid := CompareLetter(x, word)
 		guessedWord = revealHiddenLetter(word, guessedWord, x, isValid)
@@ -234,25 +234,30 @@ func DisplayBlankWord(randWord string) string { //displays the word in hidden le
 	return strings.Join(randWordL, "")
 }
 
-/*func DiplayRandLetters(blankword string, randword string) string {
-	randomIndexL := rand.Perm(len(blankword)/2 - 1)
+func DiplayRandLetters(blankword string, randword string) string {
+	n := len(randword)/2 - 1
+	randomIndexL := make([]int, n)
+	rand.Seed(time.Now().UnixNano())
+	for k := 0; k < n; k++ {
+		randomIndexL[k] = rand.Intn(len(randword))
+	}
 	blankwordL := strings.Split(blankword, "")
 	randwordL := strings.Split(randword, "")
 	for i := 0; i < len(blankword); i++ {
 		for j := 0; j < len(randomIndexL); j++ {
 			if i == randomIndexL[j] {
-				blankwordL[i] = randwordL[i]
+				blankwordL[i*2] = randwordL[i]
 			}
 		}
 	}
 	return strings.Join(blankwordL, "")
-}*/
+}
 
 func revealHiddenLetter(word string, guessWord string, InputLetter string, isInWord bool) string { //reveals the hidden letters
 	guessWordL := strings.Split(guessWord, " ")
 	realWordL := strings.Split(word, "")
 	for i := 0; i < len(guessWordL); i++ {
-		if isInWord && InputLetter == realWordL[i] {
+		if isInWord && InputLetter == realWordL[i] && guessWordL[i] == "_" {
 			guessWordL[i] = InputLetter
 		}
 	}
@@ -299,22 +304,6 @@ func PaintRow(colors []Color, row []string) []string {
 		paintedRow[i] = Paint(colors[i], v)
 	}
 	return paintedRow
-}
-
-func PaintRowUniformly(color Color, row []string) []string {
-	colors := make([]Color, len(row))
-	for i, _ := range colors {
-		colors[i] = color
-	}
-	return PaintRow(colors, row)
-}
-
-func AnonymizeRow(row []string) []string {
-	anonRow := make([]string, len(row))
-	for i, v := range row {
-		anonRow[i] = strings.Repeat("-", len(v))
-	}
-	return anonRow
 }
 
 func PrintRow(writer io.Writer, line []string) {
