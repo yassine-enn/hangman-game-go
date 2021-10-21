@@ -66,103 +66,15 @@ by Juliette & Yassine
 
 const rules = `
 Regles : Vous avez 10 tentatives pour deviner le mot aléatoire.
-A chaque fois que vous vous trompé, José s'approche davantage de la mort.
-Ne laisse pas José se pendre ! Bonne chance !`
-
-var positions = []string{
-	`
-	`,
-	`
-        
-         
-         
-
-=========
-`,
-	`
-         
-      |  
-      |  
-      |  
-      |  
-      |  
-=========
-`,
-	`
-
-  +---+  
-      |  
-      |  
-      |  
-      |  
-      |  
-=========
-`,
-	`
-  +---+  
-  |   |  
-      |  
-      |  
-      |  
-      |  
-=========
-`,
-	`
-  +---+  
-  |   |  
-  O   |  
-      |  
-      |  
-      |  
-=========
-`,
-	`
-  +---+  
-  |   |  
-  O   |  
-  |   |  
-      |  
-      |  
-=========
-`,
-	`
-  +---+  
-  |   |  
-  O   |  
- /|   |  
-      |  
-      |  
-=========
-`,
-	`
-  +---+  
-  |   |  
-  O   |  
- /|\  |  
-      |  
-      |  
-=========
-`,
-	`
-  +---+  
-  |   |  
-  O   |  
- /|\  |  
- /    |  
-      |  
-=========
-`,
-	`
-  +---+  
-  |   |  
-  O   |  
- /|\  |  
- / \  |  
-      |  
-=========
-`}
+A chaque fois que vous vous trompez, José s'approche davantage de la mort.
+Ne laissez pas José se pendre ! Bonne chance !`
 
 func main() {
+	posByte, err1 := ioutil.ReadFile("hangman.txt")
+	if err1 != nil {
+		log.Fatal(err1)
+	}
+	positions := strings.Split(string(posByte), "`,")
 	clearScreen()
 	var pos int = 0
 	var x string
