@@ -38,7 +38,9 @@ func main() {
 	for remainingAttempts >= 0 && guessedWord != word {
 		fmt.Scan(&x)
 		LetterAlreadyEntered = append(LetterAlreadyEntered, x)
-		fmt.Println("Les lettres que vous avez déjà saisies sont", LetterAlreadyEntered)
+		if x != "quitter" {
+			fmt.Println("Les lettres que vous avez déjà saisies sont", LetterAlreadyEntered)
+		}
 		isValid := CompareLetter(x, word)
 		guessedWord = revealHiddenLetter(word, guessedWord, x, isValid)
 		fmt.Println(guessedWord)
@@ -59,10 +61,10 @@ func main() {
 			}
 		}
 		if strings.Compare(strings.Join(strings.Split(guessedWord, " "), ""), word) == 0 && remainingAttempts > 0 {
-			fmt.Println("Bien joué! Vous avez sauvé José!")
+			fmt.Println("\nBien joué! Vous avez sauvé José!")
 			break
 		} else if remainingAttempts == 0 {
-			fmt.Println("\n RIP José ", "\n Le mot à deviner était: ", word)
+			fmt.Println("\nRIP José ", "\nLe mot à deviner était: ", word)
 			fmt.Printf("Tapez oui pour recommencer une nouvelle partie > ")
 			fmt.Scan(&replay)
 			if replay == "oui" {
@@ -118,9 +120,12 @@ func CompareLetter(InputLetter string, Word string) bool { //checks whether the 
 func DiplayRandLetters(blankword string, randword string) string {
 	n := len(randword)/2 - 1
 	randomIndexL := make([]int, n)
-	for k := 0; k < len(randomIndexL); k++ {
-		randomIndexL[k] = rand.Intn(n)
+	for len(unique(randomIndexL)) != n {
+		for k := 0; k < len(randomIndexL); k++ {
+			randomIndexL[k] = rand.Intn(n)
+		}
 	}
+	fmt.Println(randomIndexL)
 	randwordL := []rune(randword)
 	blankwordL := []rune(blankword)
 	for i := 0; i < len(randwordL); i++ {
@@ -131,4 +136,16 @@ func DiplayRandLetters(blankword string, randword string) string {
 		}
 	}
 	return string(blankwordL)
+}
+
+func unique(intSlice []int) []int {
+	keys := make(map[int]bool)
+	list := []int{}
+	for _, entry := range intSlice {
+		if _, value := keys[entry]; !value {
+			keys[entry] = true
+			list = append(list, entry)
+		}
+	}
+	return list
 }
