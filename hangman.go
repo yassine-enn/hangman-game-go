@@ -2,170 +2,22 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
 	"math/rand"
-	"os"
-	"os/exec"
 	"strings"
-	"text/tabwriter"
 	"time"
 )
 
-type Color string
-
-const (
-	Reset                   Color = "\x1b[0000m"
-	Bright                        = "\x1b[0001m"
-	BlackText                     = "\x1b[0030m"
-	RedText                       = "\x1b[0031m"
-	GreenText                     = "\x1b[0032m"
-	YellowText                    = "\x1b[0033m"
-	BlueText                      = "\x1b[0034m"
-	MagentaText                   = "\x1b[0035m"
-	CyanText                      = "\x1b[0036m"
-	WhiteText                     = "\x1b[0037m"
-	DefaultText                   = "\x1b[0039m"
-	BrightRedText                 = "\x1b[1;31m"
-	BrightGreenText               = "\x1b[1;32m"
-	BrightYellowText              = "\x1b[1;33m"
-	BrightBlueText                = "\x1b[1;34m"
-	BrightMagentaText             = "\x1b[1;35m"
-	BrightCyanText                = "\x1b[1;36m"
-	BrightWhiteText               = "\x1b[1;37m"
-	BlackBackground               = "\x1b[0040m"
-	RedBackground                 = "\x1b[0041m"
-	GreenBackground               = "\x1b[0042m"
-	YellowBackground              = "\x1b[0043m"
-	BlueBackground                = "\x1b[0044m"
-	MagentaBackground             = "\x1b[0045m"
-	CyanBackground                = "\x1b[0046m"
-	WhiteBackground               = "\x1b[0047m"
-	BrightBlackBackground         = "\x1b[0100m"
-	BrightRedBackground           = "\x1b[0101m"
-	BrightGreenBackground         = "\x1b[0102m"
-	BrightYellowBackground        = "\x1b[0103m"
-	BrightBlueBackground          = "\x1b[0104m"
-	BrightMagentaBackground       = "\x1b[0105m"
-	BrightCyanBackground          = "\x1b[0106m"
-	BrightWhiteBackground         = "\x1b[0107m"
-)
-
-const hangman = `                                                
- _   _    _    _   _  ____ __  __    _    _   _ 
-| | | |  / \  | \ | |/ ___|  \/  |  / \  | \ | |
-| |_| | / _ \ |  \| | |  _| |\/| | / _ \ |  \| |
-|  _  |/ ___ \| |\  | |_| | |  | |/ ___ \| |\  |
-|_| |_/_/   \_|_| \_|\____|_|  |_/_/   \_|_| \_|
-`
-
-const droits = `
-by Juliette & Yassine
-`
-
-const rules = `
-Regles : Vous avez 10 tentatives pour deviner le mot aléatoire.
-A chaque fois que vous vous trompé, José s'approche davantage de la mort.
-Ne laisse pas José se pendre ! Bonne chance !`
-
-var positions = []string{
-	`
-	`,
-	`
-        
-         
-         
-
-=========
-`,
-	`
-         
-      |  
-      |  
-      |  
-      |  
-      |  
-=========
-`,
-	`
-
-  +---+  
-      |  
-      |  
-      |  
-      |  
-      |  
-=========
-`,
-	`
-  +---+  
-  |   |  
-      |  
-      |  
-      |  
-      |  
-=========
-`,
-	`
-  +---+  
-  |   |  
-  O   |  
-      |  
-      |  
-      |  
-=========
-`,
-	`
-  +---+  
-  |   |  
-  O   |  
-  |   |  
-      |  
-      |  
-=========
-`,
-	`
-  +---+  
-  |   |  
-  O   |  
- /|   |  
-      |  
-      |  
-=========
-`,
-	`
-  +---+  
-  |   |  
-  O   |  
- /|\  |  
-      |  
-      |  
-=========
-`,
-	`
-  +---+  
-  |   |  
-  O   |  
- /|\  |  
- /    |  
-      |  
-=========
-`,
-	`
-  +---+  
-  |   |  
-  O   |  
- /|\  |  
- / \  |  
-      |  
-=========
-`}
-
 func main() {
 	clearScreen()
-	var pos int = 0
 	var x string
+	posByte, err1 := ioutil.ReadFile("hangman.txt")
+	if err1 != nil {
+		log.Fatal(err1)
+	}
+	positions := strings.Split(string(posByte), "`,")
+	var pos int = 0
 	var replay string
 	rand.Seed(time.Now().UnixNano())
 	content, err := ioutil.ReadFile("words.txt")
@@ -178,11 +30,16 @@ func main() {
 	randomNumber := rand.Intn(max-min) + min //picks a random number between 0 and the number of lines of words.txt*
 	word := wordsL[randomNumber]
 	remainingAttempts := 10
-	fmt.Println(DisplayBlankWord(word))
+	blankWord := DisplayBlankWord(word)
+	var LetterAlreadyEntered []string
+	var guessedWord string = DiplayRandLetters(blankWord, word)
+	fmt.Println("Le mot à deviner est: ", guessedWord)
 	fmt.Printf("Saisissez la lettre voulue > ")
-	var guessedWord string = DisplayBlankWord(word)
 	for remainingAttempts >= 0 && guessedWord != word {
 		fmt.Scan(&x)
+		LetterAlreadyEntered = append(LetterAlreadyEntered, x)
+		clearScreen()
+		fmt.Println("Les lettres que vous avez déjà saisies sont", LetterAlreadyEntered)
 		isValid := CompareLetter(x, word)
 		guessedWord = revealHiddenLetter(word, guessedWord, x, isValid)
 		fmt.Println(guessedWord)
@@ -221,35 +78,9 @@ func main() {
 	}
 }
 
-func DisplayBlankWord(randWord string) string { //displays the word in hidden letters
-	randWordL := make([]string, len(randWord))
-	for i := 0; i < len(randWord); i++ {
-		if i == len(randWord)-1 {
-			randWordL = append(randWordL, "_")
-		} else {
-			randWordL = append(randWordL, "_ ")
-		}
-	}
-
-	return strings.Join(randWordL, "")
-}
-
-/*func DiplayRandLetters(blankword string, randword string) string {
-	randomIndexL := rand.Perm(len(blankword)/2 - 1)
-	blankwordL := strings.Split(blankword, "")
-	randwordL := strings.Split(randword, "")
-	for i := 0; i < len(blankword); i++ {
-		for j := 0; j < len(randomIndexL); j++ {
-			if i == randomIndexL[j] {
-				blankwordL[i] = randwordL[i]
-			}
-		}
-	}
-	return strings.Join(blankwordL, "")
-}*/
-
 func revealHiddenLetter(word string, guessWord string, InputLetter string, isInWord bool) string { //reveals the hidden letters
 	guessWordL := strings.Split(guessWord, " ")
+	fmt.Println(guessWordL)
 	realWordL := strings.Split(word, "")
 	for i := 0; i < len(guessWordL); i++ {
 		if isInWord && InputLetter == realWordL[i] {
@@ -259,10 +90,23 @@ func revealHiddenLetter(word string, guessWord string, InputLetter string, isInW
 	return strings.Join(guessWordL, " ")
 }
 
+func DisplayBlankWord(randWord string) string { //displays the word in hidden letters
+	randWordL := make([]string, len(randWord))
+	randWordRune := []rune(randWord)
+	for i := 0; i < len(randWordRune); i++ {
+		if i == len(randWordRune)-1 {
+			randWordL = append(randWordL, "_")
+		} else {
+			randWordL = append(randWordL, "_ ")
+		}
+	}
+
+	return strings.Join(randWordL, "")
+}
+
 func CompareLetter(InputLetter string, Word string) bool { //checks whether the inputted letter is in in the word
 	tabstring := []rune(Word)
 	InputLetterR := []rune(InputLetter)
-
 	var result bool = false
 	for i := 0; i < len(tabstring); i++ {
 		if tabstring[i] == InputLetterR[0] {
@@ -272,53 +116,20 @@ func CompareLetter(InputLetter string, Word string) bool { //checks whether the 
 	return result
 }
 
-func clearScreen() { // permet d'effacer les affichages précédents sauf le logo HANGMAN
-	c := exec.Command("clear")
-	c.Stdout = os.Stdout
-	c.Run()
-	writer := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0) //  gestion des éspaces autour des affichages afin d'avoir quelque chose d'aligner
-	colors := []Color{BrightCyanText, BrightGreenText, RedBackground}
-	PrintRow(writer, PaintRow(colors, []string{hangman, droits, rules}))
-}
-
-//---------------------------------------------------------------
-
-// traitement couleur
-
-func (c *Color) String() string {
-	return fmt.Sprintf("%v", c)
-}
-
-func Paint(color Color, value string) string {
-	return fmt.Sprintf("%v%v%v", color, value, Reset)
-}
-
-func PaintRow(colors []Color, row []string) []string {
-	paintedRow := make([]string, len(row))
-	for i, v := range row {
-		paintedRow[i] = Paint(colors[i], v)
+func DiplayRandLetters(blankword string, randword string) string {
+	n := len(randword)/2 - 1
+	randomIndexL := make([]int, n)
+	for k := 0; k < len(randomIndexL); k++ {
+		randomIndexL[k] = rand.Intn(n)
 	}
-	return paintedRow
-}
-
-func PaintRowUniformly(color Color, row []string) []string {
-	colors := make([]Color, len(row))
-	for i, _ := range colors {
-		colors[i] = color
+	randwordL := []rune(randword)
+	blankwordL := []rune(blankword)
+	for i := 0; i < len(randwordL); i++ {
+		for j := 0; j < len(randomIndexL); j++ {
+			if i == randomIndexL[j] {
+				blankwordL[i*2] = randwordL[i]
+			}
+		}
 	}
-	return PaintRow(colors, row)
+	return string(blankwordL)
 }
-
-func AnonymizeRow(row []string) []string {
-	anonRow := make([]string, len(row))
-	for i, v := range row {
-		anonRow[i] = strings.Repeat("-", len(v))
-	}
-	return anonRow
-}
-
-func PrintRow(writer io.Writer, line []string) {
-	fmt.Fprintln(writer, strings.Join(line, "\t"))
-}
-
-//--------------------------------------------------------
