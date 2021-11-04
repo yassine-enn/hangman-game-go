@@ -123,7 +123,7 @@ func DiplayRandLetters(blankword string, randword string) string {
 	randomIndexL := make([]int, n)
 	for len(unique(randomIndexL)) != n {
 		for k := 0; k < len(randomIndexL); k++ {
-			randomIndexL[k] = rand.Intn(n)
+			randomIndexL[k] = rand.Intn(len(randword))
 		}
 	}
 	fmt.Println(randomIndexL)
