@@ -62,7 +62,7 @@ by Juliette & Yassine
 
 const rules = `
 Regles : Vous avez 10 tentatives pour deviner le mot aléatoire.
-A chaque fois que vous vous trompé, José s'approche davantage de la mort.
+A chaque fois que vous vous trompez, José s'approche davantage de la mort.
 Ne laisse pas José se pendre ! Bonne chance !`
 
 func clearScreen() { // permet d'effacer les affichages précédents sauf le logo HANGMAN
