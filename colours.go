@@ -78,10 +78,6 @@ func clearScreen() { // permet d'effacer les affichages précédents sauf le log
 
 // traitement couleur
 
-func (c *Color) String() string {
-	return fmt.Sprintf("%v", c)
-}
-
 func Paint(color Color, value string) string {
 	return fmt.Sprintf("%v%v%v", color, value, Reset)
 }
