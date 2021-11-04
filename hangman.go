@@ -38,6 +38,7 @@ func main() {
 	for remainingAttempts >= 0 && guessedWord != word {
 		fmt.Scan(&x)
 		LetterAlreadyEntered = append(LetterAlreadyEntered, x)
+		clearScreen()
 		if x != "quitter" {
 			fmt.Println("Les lettres que vous avez déjà saisies sont", LetterAlreadyEntered)
 		}
