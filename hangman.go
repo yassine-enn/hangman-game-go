@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"math/rand"
+	"os"
 	"strings"
 	"time"
 )
@@ -14,7 +14,8 @@ func main() {
 	var x string
 	posByte, err1 := ioutil.ReadFile("hangman.txt")
 	if err1 != nil {
-		log.Fatal(err1)
+		fmt.Println("Nous n'avons pas pu trouver le fichier hangman.txt")
+		os.Exit(1)
 	}
 	positions := strings.Split(string(posByte), "`,")
 	var pos int = 0
@@ -22,7 +23,8 @@ func main() {
 	rand.Seed(time.Now().UnixNano())
 	content, err := ioutil.ReadFile("words.txt")
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println("Nous n'avons pas pu trouver le fichier words.txt")
+		os.Exit(1)
 	}
 	wordsL := strings.Split(string(content), "\n") //list of words from words.txt
 	min := 0
